@@ -1,36 +1,42 @@
 package com.example.soc_macmini_15.musicplayer.Activity;
 
+
 import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
-import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
-
-import android.view.Gravity;
+import android.os.Environment;
+import android.os.Handler;
+import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.SearchView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import com.example.soc_macmini_15.musicplayer.Adapter.ViewPagerAdapter;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
@@ -39,10 +45,14 @@ import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Fragments.FavSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.SongsList;
 import com.example.soc_macmini_15.musicplayer.R;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.tabs.TabLayout;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, AllSongFragment.createDataParse, FavSongFragment.createDataParsed, CurrentSongFragment.createDataParsed {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, AllSongFragment.createDataParse, FavSongFragment.createDataParsed, CurrentSongFragment.createDataParse, ApiCall.createDataParse {
 
     private Menu menu;
 
@@ -64,18 +74,68 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private int allSongLength;
 
     MediaPlayer mediaPlayer;
+    // send and process message/runnable to the thread's messageQueue.
     Handler handler;
+    // interface which is implemented by class whose instances are executed by a thread
     Runnable runnable;
-
+    private ActivityResultLauncher<Intent> storageActivityResultLauncher;
+//    private ActivityResultLauncher<String> permissionLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        storageActivityResultLauncherResult();
+
+//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+//        StrictMode.setThreadPolicy(policy);
+
+
+//        permissionLauncher = registerForActivityResult(
+//                new ActivityResultContracts.RequestPermission(),
+//                new ActivityResultCallback<Boolean>() {
+//                    @Override
+//                    public void onActivityResult(Boolean isGranted) {
+//                        if (isGranted) {
+//                            // Permission granted, start the foreground service
+//                            startForegroundService();
+//                        } else {
+//                            // Permission denied, handle the case
+//                            Toast.makeText(MainActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
+//                        }
+//                    }
+//                });
+
         init();
-        grantedPermission();
+        if (checkStoragePermissions()) {
+            setPagerLayout(new ArrayList<>());
+        } else {
+            requestPermission();
+        }
+
 
     }
+
+    private void storageActivityResultLauncherResult() {
+        storageActivityResultLauncher =
+                registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                        new ActivityResultCallback<ActivityResult>() {
+                            @Override
+                            public void onActivityResult(ActivityResult o) {
+                                if (checkStoragePermissions()) {
+                                    Toast.makeText(MainActivity.this, "Storage Permissions Granted", Toast.LENGTH_SHORT).show();
+                                    setPagerLayout(new ArrayList<>());
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Storage Permissions Denied", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+    }
+
+//    private void startForegroundService() {
+//        Intent serviceIntent = new Intent(this, MyForegroundService.class);
+//        ContextCompat.startForegroundService(this, serviceIntent);
+//    }
 
     /**
      * Initialising the views
@@ -100,11 +160,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mediaPlayer = new MediaPlayer();
 
         toolbar.setTitleTextColor(getResources().getColor(R.color.text_color));
+        // set toolBar as ActionBar
         setSupportActionBar(toolbar);
-
         ActionBar actionBar = getSupportActionBar();
         assert actionBar != null;
+        // showing the back button in action bar
         actionBar.setDisplayHomeAsUpEnabled(true);
+        // set drawable to display when clicked on icon/logo/title, replacing the back button.
         actionBar.setHomeAsUpIndicator(R.drawable.menu_icon);
 
         imgBtnNext.setOnClickListener(this);
@@ -129,30 +191,72 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
+    private boolean isAndroid_11_OrAbove() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
+    }
+
+    private boolean checkStoragePermissions() {
+
+        if (isAndroid_11_OrAbove()) {
+            //Android is 11 (R) or above
+            return Environment.isExternalStorageManager();
+
+        } else {
+            //Below android 11
+            int write = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int read = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            return read == PackageManager.PERMISSION_GRANTED && write == PackageManager.PERMISSION_GRANTED;
+        }
+    }
+
     /**
      * Function to ask user to grant the permission.
      */
 
-    private void grantedPermission() {
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+    private void requestPermission() {
+        if (isAndroid_11_OrAbove()) {
+            //Android is 11 (R) or above
+            try {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                Uri uri = Uri.fromParts("package", this.getPackageName(), null);
+                intent.setData(uri);
+                storageActivityResultLauncher.launch(intent);
+//                ActivityCompat.requestPermissions(MainActivity.this,
+//                        new String[]{Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE}, MY_PERMISSION_REQUEST);
+//                // Request the permission at runtime
+//                permissionLauncher.launch(Manifest.permission.FOREGROUND_SERVICE_SPECIAL_USE);
+            } catch (Exception e) {
+                Intent intent = new Intent();
+                intent.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                storageActivityResultLauncher.launch(intent);
+            }
+        } else {
+            //Below android 11
             ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
+            // To check whether Rationale UI can be shown or not.
+            // Rationale UI shows why a certain permission is required.
+            // Use this if the person denies permission at first time.
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    Manifest.permission.READ_EXTERNAL_STORAGE) ||
+                    ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                 ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSION_REQUEST);
             } else {
-                if (ContextCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (!checkStoragePermissions()) {
+                    // Shows a message
                     Snackbar snackbar = Snackbar.make(mDrawerLayout, "Provide the Storage Permission", Snackbar.LENGTH_LONG);
                     snackbar.show();
                 }
             }
-        } else {
-            setPagerLayout();
         }
     }
+
 
     /**
      * Checking if the permission is granted or not
@@ -163,13 +267,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case MY_PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ContextCompat.checkSelfPermission(MainActivity.this,
                             Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                         Toast.makeText(this, "Permission Granted!", Toast.LENGTH_SHORT).show();
-                        setPagerLayout();
+                        setPagerLayout(new ArrayList<>());
                     } else {
                         Snackbar snackbar = Snackbar.make(mDrawerLayout, "Provide the Storage Permission", Snackbar.LENGTH_LONG);
                         snackbar.show();
@@ -183,8 +288,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Setting up the tab layout with the viewpager in it.
      */
 
-    private void setPagerLayout() {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), getContentResolver());
+    public void setPagerLayout(ArrayList<SongsList> searchResultList) {
+        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), getContentResolver(), searchResultList);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -249,17 +354,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+        ApiCall apiCall = new ApiCall(this);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return false;
+                apiCall.setQuery(query);
+                apiCall.doInBackground();
+                return true;
+//                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 searchText = newText;
                 queryText();
-                setPagerLayout();
+                setPagerLayout(new ArrayList<>());
                 return true;
             }
         });
@@ -272,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (item.getItemId()) {
             case android.R.id.home:
-                mDrawerLayout.openDrawer(Gravity.START);
+                mDrawerLayout.openDrawer(GravityCompat.START);
                 return true;
             case R.id.menu_search:
                 Toast.makeText(this, "Search", Toast.LENGTH_SHORT).show();
@@ -287,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     songList.get(currentPosition).getSubTitle(), songList.get(currentPosition).getPath());
                             FavoritesOperations favoritesOperations = new FavoritesOperations(this);
                             favoritesOperations.addSongFav(favList);
-                            setPagerLayout();
+                            setPagerLayout(new ArrayList<>());
                             favFlag = false;
                         } else {
                             item.setIcon(R.drawable.favorite_icon);
@@ -326,7 +435,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_refresh:
                 Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show();
-                setPagerLayout();
+                setPagerLayout(new ArrayList<>());
                 break;
             case R.id.img_btn_replay:
 

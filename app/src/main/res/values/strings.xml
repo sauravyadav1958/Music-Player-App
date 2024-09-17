@@ -22,4 +22,12 @@
     <string name="delete">Delete</string>
     <string name="delete_text"> Are you sure you want to delete</string>
     <string name="play_next">Play Next</string>
+    <string name="grant_type">client_credentials</string>
+    <string name="client_id">d71a10af8c3b49e0896b4a5d0e4661c1</string>
+    <string name="client_secret">939f5ae494ee4a9eacc8040ad2d46307</string>
+    <string name="contentType">application/x-www-form-urlencoded</string>
+    <string name="accessToken">BQCGqyfpAf95URPykn9M-b8ODoAi5a4NmhxEo5ry3oK3iekBB_3xBNb05v-RepGluGjda_ci9r2O5mzigX7qjGF-q3TwgZHaRuBg_9gLaIg1zmGmV9k</string>
+    <string name="type">track</string>
+    <string name="offset">0</string>
+    <string name="limit">20</string>
 </resources>

@@ -5,22 +5,20 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.ListFragment;
 
 import com.example.soc_macmini_15.musicplayer.Adapter.SongAdapter;
 import com.example.soc_macmini_15.musicplayer.Model.SongsList;
@@ -42,6 +40,7 @@ public class AllSongFragment extends ListFragment {
     private ContentResolver contentResolver;
 
     public static Fragment getInstance(int position, ContentResolver mcontentResolver) {
+        // Store key pair data
         Bundle bundle = new Bundle();
         bundle.putInt("pos", position);
         AllSongFragment tabFragment = new AllSongFragment();
@@ -56,6 +55,8 @@ public class AllSongFragment extends ListFragment {
 
     }
 
+    // Context: It allows us to information about application/activity and access to it's resources.
+    // Eg : Room-service person of a hotel.
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -119,8 +120,12 @@ public class AllSongFragment extends ListFragment {
 
 
     public void getMusic() {
+
         Uri songUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+//        Uri songUri = MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music");
+        // point to a single row in result fetched by the query
         Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
+        // songCursor.moveToFirst() : move cursor to first row
         if (songCursor != null && songCursor.moveToFirst()) {
             int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
@@ -174,6 +179,7 @@ public class AllSongFragment extends ListFragment {
         public String queryText();
 
         public void currentSong(SongsList songsList);
+
         public void getLength(int length);
     }
 

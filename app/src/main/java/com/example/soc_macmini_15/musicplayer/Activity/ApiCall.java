@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.SongsList;
 import com.example.soc_macmini_15.musicplayer.R;
@@ -13,6 +14,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,10 +24,12 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
 
     private Context context;
     private createDataParse createDataParse;
+    private FavoritesOperations favoritesOperations;
 
     public ApiCall(Context context) {
         this.context = context;
         createDataParse = (createDataParse) this.context;
+        favoritesOperations = new FavoritesOperations(context);
     }
 
 
@@ -93,6 +97,7 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
                             JsonArray tracks = response.body().getAsJsonObject("tracks").getAsJsonArray("items");
                             // Handle the response, e.g., update the UI
                             searchResultList = new ArrayList<>();
+                            ArrayList<SongsList> favSongList = favoritesOperations.getAllFavorites();
                             for (JsonElement track : tracks) {
                                 String name = track.getAsJsonObject().get("name").getAsString();
                                 String id = track.getAsJsonObject().get("id").getAsString();
@@ -102,6 +107,10 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
                                 }
                                 String preview_url = url.getAsString();
                                 String fav = "0";
+                                Optional<SongsList> favSong = favSongList.stream().filter(songsList -> songsList.getPath().equals(preview_url)).findFirst();
+                                if (favSong.isPresent()) {
+                                    fav = "1";
+                                }
                                 searchResultList.add(new SongsList(name, id, preview_url, fav));
                             }
                             CurrentSongFragment.newList = searchResultList;

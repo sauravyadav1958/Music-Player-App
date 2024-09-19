@@ -5,7 +5,7 @@ android {
     namespace 'com.example.soc_macmini_15.musicplayer'
     defaultConfig {
         applicationId "com.example.soc_macmini_15.musicplayer"
-        minSdkVersion 23
+        minSdkVersion 24
         targetSdkVersion 34
         versionCode 1
         versionName "1.0"

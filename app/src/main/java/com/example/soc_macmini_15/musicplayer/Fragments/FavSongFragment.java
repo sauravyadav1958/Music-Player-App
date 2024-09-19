@@ -111,10 +111,10 @@ public class FavSongFragment extends ListFragment {
     }
 
     private void deleteOption(int position) {
-        if (position != createDataParsed.getPosition())
+//        if (position != createDataParsed.getPosition())
             showDialog(songsList.get(position).getPath(), position);
-        else
-            Toast.makeText(getContext(), "You Can't delete the Current Song", Toast.LENGTH_SHORT).show();
+//        else
+//            Toast.makeText(getContext(), "You Can't delete the Current Song", Toast.LENGTH_SHORT).show();
     }
 
     public interface createDataParsed {

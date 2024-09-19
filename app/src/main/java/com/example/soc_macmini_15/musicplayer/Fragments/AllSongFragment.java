@@ -21,15 +21,18 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.ListFragment;
 
 import com.example.soc_macmini_15.musicplayer.Adapter.SongAdapter;
+import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Model.SongsList;
 import com.example.soc_macmini_15.musicplayer.R;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class AllSongFragment extends ListFragment {
 
 
     private static ContentResolver contentResolver1;
+    private FavoritesOperations favoritesOperations;
 
     public ArrayList<SongsList> songsList;
     public ArrayList<SongsList> newList;
@@ -61,6 +64,7 @@ public class AllSongFragment extends ListFragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         createDataParse = (createDataParse) context;
+        favoritesOperations = new FavoritesOperations(context);
     }
 
     @Override
@@ -125,15 +129,22 @@ public class AllSongFragment extends ListFragment {
 //        Uri songUri = MediaStore.Audio.Media.getContentUriForPath("/storage/emulated/0/Music");
         // point to a single row in result fetched by the query
         Cursor songCursor = contentResolver.query(songUri, null, null, null, null);
+        ArrayList<SongsList> favSongList = favoritesOperations.getAllFavorites();
         // songCursor.moveToFirst() : move cursor to first row
         if (songCursor != null && songCursor.moveToFirst()) {
             int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
             int songPath = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
             int songFav = songCursor.getColumnIndex(MediaStore.Audio.Media.IS_FAVORITE);
+            String fav = songCursor.getString(songFav);
+            String path = songCursor.getString(songPath);
+            Optional<SongsList> favSong = favSongList.stream().filter(songsList -> songsList.getPath().equals(path)).findFirst();
+            if (favSong.isPresent()) {
+                fav = "1";
+            }
 
             do {
-                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath), songCursor.getString(songFav)));
+                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), path, fav));
             } while (songCursor.moveToNext());
             songCursor.close();
         }

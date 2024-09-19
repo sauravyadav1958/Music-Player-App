@@ -2,17 +2,16 @@ package com.example.soc_macmini_15.musicplayer.Activity;
 
 
 import android.content.Context;
-import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.SongsList;
 import com.example.soc_macmini_15.musicplayer.R;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import retrofit2.Call;
@@ -102,33 +101,37 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
                                     continue;
                                 }
                                 String preview_url = url.getAsString();
-                                searchResultList.add(new SongsList(name, id, preview_url));
+                                String fav = "0";
+                                searchResultList.add(new SongsList(name, id, preview_url, fav));
                             }
-//                            createDataParse.setPagerLayout(searchResultList);
+                            CurrentSongFragment.newList = searchResultList;
+                            createDataParse.setPagerLayout(searchResultList);
+                            createDataParse.setViewPager(1);
 
-                            String preview_url = response.body().getAsJsonObject("tracks").getAsJsonArray("items")
-                                    .get(0).getAsJsonObject().get("preview_url").getAsString();
-                            MediaPlayer mediaPlayer = new MediaPlayer();
-                            try {
-                                mediaPlayer.setDataSource(preview_url);
-                                mediaPlayer.prepare();
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
 
-                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                @Override
-                                public void onPrepared(MediaPlayer mp) {
-                                    mp.start(); // Start playback when prepared
-                                    try {
-                                        mp.start();
-                                        Thread.sleep(5000);
-                                        mp.stop();
-                                    } catch (InterruptedException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }
-                            });
+//                            String preview_url = response.body().getAsJsonObject("tracks").getAsJsonArray("items")
+//                                    .get(0).getAsJsonObject().get("preview_url").getAsString();
+//                            MediaPlayer mediaPlayer = new MediaPlayer();
+//                            try {
+//                                mediaPlayer.setDataSource(preview_url);
+//                                mediaPlayer.prepare();
+//                            } catch (IOException e) {
+//                                throw new RuntimeException(e);
+//                            }
+//
+//                            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+//                                @Override
+//                                public void onPrepared(MediaPlayer mp) {
+//                                    mp.start(); // Start playback when prepared
+//                                    try {
+//                                        mp.start();
+//                                        Thread.sleep(5000);
+//                                        mp.stop();
+//                                    } catch (InterruptedException e) {
+//                                        throw new RuntimeException(e);
+//                                    }
+//                                }
+//                            });
                         } else {
                             // Handle the error
                             Log.e(TAG, "Request failed with code: " + response.code());
@@ -155,6 +158,8 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
 
     public interface createDataParse {
         public void setPagerLayout(ArrayList<SongsList> searchResultList);
+
+        public void setViewPager(int position);
 
     }
 

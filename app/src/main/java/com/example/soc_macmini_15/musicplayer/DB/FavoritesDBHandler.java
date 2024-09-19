@@ -9,15 +9,16 @@ public class FavoritesDBHandler extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "favorites.db";
     private static final int DATABASE_VERSION = 1;
 
-    public static final String TABLE_SONGS           = "favorites";
-    public static final String COLUMN_ID             = "songID";
-    public static final String COLUMN_TITLE          = "title";
-    public static final String COLUMN_SUBTITLE       = "subtitle";
-    public static final String COLUMN_PATH           = "songpath";
+    public static final String TABLE_SONGS = "favorites";
+    public static final String COLUMN_ID = "songID";
+    public static final String COLUMN_TITLE = "title";
+    public static final String COLUMN_SUBTITLE = "subtitle";
+    public static final String COLUMN_PATH = "songpath";
+    public static final String COLUMN_FAV = "fav";
 
     private static final String TABLE_CREATE = "CREATE TABLE " + TABLE_SONGS + " (" + COLUMN_ID
             + " INTEGER, " + COLUMN_TITLE + " TEXT, " + COLUMN_SUBTITLE
-            + " TEXT, " + COLUMN_PATH + " TEXT PRIMARY KEY " + ")";
+            + " TEXT, " + COLUMN_FAV + " INTEGER, " + COLUMN_PATH + " TEXT PRIMARY KEY " + ")";
 
     public FavoritesDBHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

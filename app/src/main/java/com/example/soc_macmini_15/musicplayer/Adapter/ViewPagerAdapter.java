@@ -20,7 +20,7 @@ import java.util.List;
 public class ViewPagerAdapter extends FragmentPagerAdapter {
     // Provides application access to data.
     private ContentResolver contentResolver;
-    private String title[] = {"All SONGS", "CURRENT PLAYLIST", "FAVORITES"};
+    private String title[] = {"OFFLINE SONGS", "SEARCH SONGS", "FAVORITES"};
     ArrayList<SongsList> searchResultList;
 
     public ViewPagerAdapter(FragmentManager fm, ContentResolver contentResolver, ArrayList<SongsList> searchResultList) {

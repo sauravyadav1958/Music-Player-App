@@ -33,7 +33,7 @@ public class CurrentSongFragment extends ListFragment {
 
     public ArrayList<SongsList> songsList;
 
-    public static ArrayList<SongsList> newList;
+    public static ArrayList<SongsList> newList = new ArrayList<>();
 
     private ListView listView;
 
@@ -107,8 +107,8 @@ public class CurrentSongFragment extends ListFragment {
 //                    createDataParse.onDataPass(songsList.get(position).getTitle(), songsList.get(position).getPath());
 //                    createDataParse.fullSongList(songsList, position);
 //                } else {
-                createDataParse.onDataPass(newList.get(position).getTitle(), newList.get(position).getPath());
-                createDataParse.fullSongList(songsList, position);
+                createDataParse.onDataPass(newList.get(position).getTitle(), newList.get(position).getPath(), newList.get(position).getFav());
+                createDataParse.fullSongList(newList, position);
 //                }
             }
         });
@@ -134,9 +134,10 @@ public class CurrentSongFragment extends ListFragment {
             int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
             int songPath = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            int songFav = songCursor.getColumnIndex(MediaStore.Audio.Media.IS_FAVORITE);
 
             do {
-                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath)));
+                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath), songCursor.getString(songFav)));
             } while (songCursor.moveToNext());
             songCursor.close();
         }
@@ -176,7 +177,7 @@ public class CurrentSongFragment extends ListFragment {
     }
 
     public interface createDataParse {
-        public void onDataPass(String name, String path);
+        public void onDataPass(String name, String path, String fav);
 
         public void fullSongList(ArrayList<SongsList> songList, int position);
 
@@ -185,6 +186,7 @@ public class CurrentSongFragment extends ListFragment {
         public void currentSong(SongsList songsList);
 
         public void getLength(int length);
+
         public SongsList getSong();
 
         public boolean getPlaylistFlag();

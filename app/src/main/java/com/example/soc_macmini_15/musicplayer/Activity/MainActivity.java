@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Icon;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -56,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Menu menu;
 
-    private ImageButton imgBtnPlayPause, imgbtnReplay, imgBtnPrev, imgBtnNext, imgBtnSetting;
+    private ImageButton imgBtnPlayPause, imgbtnReplay, imgBtnPrev, imgBtnNext, imgBtnPlaylist;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private SeekBar seekbarController;
@@ -145,7 +146,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imgBtnPrev = findViewById(R.id.img_btn_previous);
         imgBtnNext = findViewById(R.id.img_btn_next);
         imgbtnReplay = findViewById(R.id.img_btn_replay);
-        imgBtnSetting = findViewById(R.id.img_btn_setting);
+        imgBtnPlaylist = findViewById(R.id.img_btn_playlist);
+        imgBtnPlaylist.setVisibility(View.INVISIBLE);
 
         tvCurrentTime = findViewById(R.id.tv_current_time);
         tvTotalTime = findViewById(R.id.tv_total_time);
@@ -174,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         imgbtnReplay.setOnClickListener(this);
         refreshSongs.setOnClickListener(this);
         imgBtnPlayPause.setOnClickListener(this);
-        imgBtnSetting.setOnClickListener(this);
+        imgBtnPlaylist.setOnClickListener(this);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -315,6 +317,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 viewPager.setCurrentItem(tab.getPosition());
+                if (tab.getPosition() == 0 || tab.getPosition() == 1) {
+                    imgBtnPlaylist.setVisibility(View.INVISIBLE);
+                } else {
+                    imgBtnPlaylist.setVisibility(View.VISIBLE);
+                }
             }
 
             @Override
@@ -328,6 +335,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
 
+    }
+
+    public void setViewPager(int position) {
+        viewPager.setCurrentItem(position);
     }
 
     /**
@@ -358,17 +369,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                apiCall.setQuery(query);
-                apiCall.doInBackground();
-                return true;
-//                return false;
+                int currentItem = viewPager.getCurrentItem();
+                if (currentItem == 1) {
+                    apiCall.setQuery(query);
+                    apiCall.doInBackground();
+                    return true;
+                }
+                return false;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
                 searchText = newText;
                 queryText();
+                int currentItem = viewPager.getCurrentItem();
                 setPagerLayout(new ArrayList<>());
+                if (currentItem == 1) {
+                    setViewPager(1);
+                } else if (currentItem == 2) {
+                    setViewPager(2);
+                }
                 return true;
             }
         });
@@ -389,18 +409,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.menu_favorites:
                 if (checkFlag)
                     if (mediaPlayer != null) {
-                        if (favFlag) {
+                        if (!favFlag) {
                             Toast.makeText(this, "Added to Favorites", Toast.LENGTH_SHORT).show();
                             item.setIcon(R.drawable.ic_favorite_filled);
+                            songList.get(currentPosition).setFav("1");
                             SongsList favList = new SongsList(songList.get(currentPosition).getTitle(),
-                                    songList.get(currentPosition).getSubTitle(), songList.get(currentPosition).getPath());
+                                    songList.get(currentPosition).getSubTitle(), songList.get(currentPosition).getPath(),
+                                    songList.get(currentPosition).getFav());
                             FavoritesOperations favoritesOperations = new FavoritesOperations(this);
                             favoritesOperations.addSongFav(favList);
+                            int currentItem = viewPager.getCurrentItem();
                             setPagerLayout(new ArrayList<>());
-                            favFlag = false;
+                            setViewPager(currentItem);
+                            favFlag = true;
                         } else {
                             item.setIcon(R.drawable.favorite_icon);
-                            favFlag = true;
+                            songList.get(currentPosition).setFav("0");
+                            String songPath = songList.get(currentPosition).getPath();
+                            FavoritesOperations favoritesOperations = new FavoritesOperations(this);
+                            favoritesOperations.removeSong(songPath);
+                            int currentItem = viewPager.getCurrentItem();
+                            setPagerLayout(new ArrayList<>());
+                            setViewPager(currentItem);
+                            favFlag = false;
                         }
                     }
                 return true;
@@ -435,17 +466,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
             case R.id.btn_refresh:
                 Toast.makeText(this, "Refreshing", Toast.LENGTH_SHORT).show();
+                int currentItem = viewPager.getCurrentItem();
                 setPagerLayout(new ArrayList<>());
+                setViewPager(currentItem);
                 break;
             case R.id.img_btn_replay:
 
                 if (repeatFlag) {
                     Toast.makeText(this, "Replaying Removed..", Toast.LENGTH_SHORT).show();
                     mediaPlayer.setLooping(false);
+                    Icon icon = Icon.createWithResource(getApplicationContext(), R.drawable.undo_icon);
+                    imgbtnReplay.setImageIcon(icon);
                     repeatFlag = false;
                 } else {
                     Toast.makeText(this, "Replaying Added..", Toast.LENGTH_SHORT).show();
                     mediaPlayer.setLooping(true);
+                    Icon icon = Icon.createWithResource(getApplicationContext(), R.drawable.undo_icon_dark);
+                    imgbtnReplay.setImageIcon(icon);
                     repeatFlag = true;
                 }
                 break;
@@ -453,13 +490,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (checkFlag) {
                     if (mediaPlayer.getCurrentPosition() > 10) {
                         if (currentPosition - 1 > -1) {
-                            attachMusic(songList.get(currentPosition - 1).getTitle(), songList.get(currentPosition - 1).getPath());
+                            attachMusic(songList.get(currentPosition - 1).getTitle(), songList.get(currentPosition - 1).getPath(), songList.get(currentPosition - 1).getFav());
                             currentPosition = currentPosition - 1;
                         } else {
-                            attachMusic(songList.get(currentPosition).getTitle(), songList.get(currentPosition).getPath());
+                            attachMusic(songList.get(currentPosition).getTitle(), songList.get(currentPosition).getPath(), songList.get(currentPosition).getFav());
                         }
                     } else {
-                        attachMusic(songList.get(currentPosition).getTitle(), songList.get(currentPosition).getPath());
+                        attachMusic(songList.get(currentPosition).getTitle(), songList.get(currentPosition).getPath(), songList.get(currentPosition).getFav());
                     }
                 } else {
                     Toast.makeText(this, "Select a Song . .", Toast.LENGTH_SHORT).show();
@@ -468,7 +505,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.img_btn_next:
                 if (checkFlag) {
                     if (currentPosition + 1 < songList.size()) {
-                        attachMusic(songList.get(currentPosition + 1).getTitle(), songList.get(currentPosition + 1).getPath());
+                        attachMusic(songList.get(currentPosition + 1).getTitle(), songList.get(currentPosition + 1).getPath(), songList.get(currentPosition + 1).getFav());
                         currentPosition += 1;
                     } else {
                         Toast.makeText(this, "Playlist Ended", Toast.LENGTH_SHORT).show();
@@ -477,12 +514,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.makeText(this, "Select the Song ..", Toast.LENGTH_SHORT).show();
                 }
                 break;
-            case R.id.img_btn_setting:
+            case R.id.img_btn_playlist:
                 if (!playContinueFlag) {
                     playContinueFlag = true;
+                    Icon icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play_dark);
+                    imgBtnPlaylist.setImageIcon(icon);
                     Toast.makeText(this, "Loop Added", Toast.LENGTH_SHORT).show();
                 } else {
                     playContinueFlag = false;
+                    Icon icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play);
+                    imgBtnPlaylist.setImageIcon(icon);
                     Toast.makeText(this, "Loop Removed", Toast.LENGTH_SHORT).show();
                 }
                 break;
@@ -496,15 +537,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * @param path
      */
 
-    private void attachMusic(String name, String path) {
+    private void attachMusic(String name, String path, String fav) {
         imgBtnPlayPause.setImageResource(R.drawable.play_icon);
         setTitle(name);
-        menu.getItem(1).setIcon(R.drawable.favorite_icon);
-        favFlag = true;
+        if (fav.equals("0")) {
+            menu.getItem(1).setIcon(R.drawable.favorite_icon);
+            favFlag = false;
+        } else {
+            menu.getItem(1).setIcon(R.drawable.ic_favorite_filled);
+            favFlag = true;
+        }
+
 
         try {
+            boolean looping = mediaPlayer.isLooping();
+
+
             mediaPlayer.reset();
             mediaPlayer.setDataSource(path);
+            mediaPlayer.setLooping(looping);
+            Icon icon;
+            if (looping) {
+                icon = Icon.createWithResource(getApplicationContext(), R.drawable.undo_icon_dark);
+            } else {
+                icon = Icon.createWithResource(getApplicationContext(), R.drawable.undo_icon);
+            }
+            imgbtnReplay.setImageIcon(icon);
+            if(playContinueFlag) {
+                icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play_dark);
+            }else{
+                icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play);
+            }
+            imgBtnPlaylist.setImageIcon(icon);
             mediaPlayer.prepare();
             setControls();
         } catch (Exception e) {
@@ -516,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 imgBtnPlayPause.setImageResource(R.drawable.play_icon);
                 if (playContinueFlag) {
                     if (currentPosition + 1 < songList.size()) {
-                        attachMusic(songList.get(currentPosition + 1).getTitle(), songList.get(currentPosition + 1).getPath());
+                        attachMusic(songList.get(currentPosition + 1).getTitle(), songList.get(currentPosition + 1).getPath(), songList.get(currentPosition + 1).getFav());
                         currentPosition += 1;
                     } else {
                         Toast.makeText(MainActivity.this, "PlayList Ended", Toast.LENGTH_SHORT).show();
@@ -617,9 +681,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
 
     @Override
-    public void onDataPass(String name, String path) {
-        Toast.makeText(this, name, Toast.LENGTH_LONG).show();
-        attachMusic(name, path);
+    public void onDataPass(String name, String path, String fav) {
+        Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+        attachMusic(name, path, fav);
     }
 
     @Override
@@ -631,8 +695,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void fullSongList(ArrayList<SongsList> songList, int position) {
         this.songList = songList;
         this.currentPosition = position;
-        this.playlistFlag = songList.size() == allSongLength;
-        this.playContinueFlag = !playlistFlag;
     }
 
     @Override

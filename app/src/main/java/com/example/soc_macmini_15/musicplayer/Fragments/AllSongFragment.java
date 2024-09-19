@@ -100,10 +100,10 @@ public class AllSongFragment extends ListFragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Toast.makeText(getContext(), "You clicked :\n" + songsList.get(position), Toast.LENGTH_SHORT).show();
                 if (!finalSearchedList) {
-                    createDataParse.onDataPass(songsList.get(position).getTitle(), songsList.get(position).getPath());
+                    createDataParse.onDataPass(songsList.get(position).getTitle(), songsList.get(position).getPath(), songsList.get(position).getFav());
                     createDataParse.fullSongList(songsList, position);
                 } else {
-                    createDataParse.onDataPass(newList.get(position).getTitle(), newList.get(position).getPath());
+                    createDataParse.onDataPass(newList.get(position).getTitle(), newList.get(position).getPath(), songsList.get(position).getFav());
                     createDataParse.fullSongList(songsList, position);
                 }
             }
@@ -130,9 +130,10 @@ public class AllSongFragment extends ListFragment {
             int songTitle = songCursor.getColumnIndex(MediaStore.Audio.Media.TITLE);
             int songArtist = songCursor.getColumnIndex(MediaStore.Audio.Media.ARTIST);
             int songPath = songCursor.getColumnIndex(MediaStore.Audio.Media.DATA);
+            int songFav = songCursor.getColumnIndex(MediaStore.Audio.Media.IS_FAVORITE);
 
             do {
-                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath)));
+                songsList.add(new SongsList(songCursor.getString(songTitle), songCursor.getString(songArtist), songCursor.getString(songPath), songCursor.getString(songFav)));
             } while (songCursor.moveToNext());
             songCursor.close();
         }
@@ -172,7 +173,7 @@ public class AllSongFragment extends ListFragment {
     }
 
     public interface createDataParse {
-        public void onDataPass(String name, String path);
+        public void onDataPass(String name, String path, String fav);
 
         public void fullSongList(ArrayList<SongsList> songList, int position);
 

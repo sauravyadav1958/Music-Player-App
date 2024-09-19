@@ -22,6 +22,7 @@ public class FavoritesOperations {
             FavoritesDBHandler.COLUMN_ID,
             FavoritesDBHandler.COLUMN_TITLE,
             FavoritesDBHandler.COLUMN_SUBTITLE,
+            FavoritesDBHandler.COLUMN_FAV,
             FavoritesDBHandler.COLUMN_PATH
     };
 
@@ -45,6 +46,7 @@ public class FavoritesOperations {
         values.put(FavoritesDBHandler.COLUMN_TITLE, songsList.getTitle());
         values.put(FavoritesDBHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
         values.put(FavoritesDBHandler.COLUMN_PATH, songsList.getPath());
+        values.put(FavoritesDBHandler.COLUMN_FAV, songsList.getFav());
 
         database.insertWithOnConflict(FavoritesDBHandler.TABLE_SONGS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
@@ -60,7 +62,8 @@ public class FavoritesOperations {
             while (cursor.moveToNext()) {
                 SongsList songsList = new SongsList(cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_TITLE))
                         , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_SUBTITLE))
-                        , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_PATH)));
+                        , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_PATH))
+                        , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_FAV)));
                 favSongs.add(songsList);
             }
         }

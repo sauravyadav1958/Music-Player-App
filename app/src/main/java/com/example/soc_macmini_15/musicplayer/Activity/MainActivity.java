@@ -563,9 +563,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 icon = Icon.createWithResource(getApplicationContext(), R.drawable.undo_icon);
             }
             imgbtnReplay.setImageIcon(icon);
-            if(playContinueFlag) {
+            if (playContinueFlag) {
                 icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play_dark);
-            }else{
+            } else {
                 icon = Icon.createWithResource(getApplicationContext(), R.drawable.baseline_playlist_play);
             }
             imgBtnPlaylist.setImageIcon(icon);
@@ -578,7 +578,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompletion(MediaPlayer mp) {
                 imgBtnPlayPause.setImageResource(R.drawable.play_icon);
-                if (playContinueFlag) {
+                if (playContinueFlag && viewPager.getCurrentItem() == 2) {
                     if (currentPosition + 1 < songList.size()) {
                         attachMusic(songList.get(currentPosition + 1).getTitle(), songList.get(currentPosition + 1).getPath(), songList.get(currentPosition + 1).getFav());
                         currentPosition += 1;

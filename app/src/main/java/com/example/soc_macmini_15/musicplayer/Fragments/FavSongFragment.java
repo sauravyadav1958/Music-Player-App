@@ -34,6 +34,7 @@ public class FavSongFragment extends ListFragment {
     private ListView listView;
 
     private createDataParsed createDataParsed;
+    private boolean searchedFilter = false;
 
     public static Fragment getInstance(int position) {
         Bundle bundle = new Bundle();
@@ -71,7 +72,7 @@ public class FavSongFragment extends ListFragment {
      * Setting the content in the listView and sending the data to the Activity
      */
     public void setSongsInListView() {
-        boolean searchedList = false;
+        searchedFilter = false;
         favouriteMusicList = new ArrayList<>();
         filteredFavouriteMusicList = new ArrayList<>();
         favouriteMusicList = favoritesOperations.getAllFavorites();
@@ -79,14 +80,14 @@ public class FavSongFragment extends ListFragment {
         if (!createDataParsed.queryText().equals("")) {
             adapter = setFilteredOfflineMusicList();
             adapter.notifyDataSetChanged();
-            searchedList = true;
+            searchedFilter = true;
         } else {
-            searchedList = false;
+            searchedFilter = false;
         }
 
         listView.setAdapter(adapter);
 
-        final boolean finalSearchedList = searchedList;
+        final boolean finalSearchedList = searchedFilter;
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -109,7 +110,11 @@ public class FavSongFragment extends ListFragment {
     }
 
     private void deleteOption(int position) {
-        showDialog(favouriteMusicList.get(position).getPath(), position);
+        if (searchedFilter) {
+            showDialog(filteredFavouriteMusicList.get(position).getPath(), position);
+        } else {
+            showDialog(favouriteMusicList.get(position).getPath(), position);
+        }
     }
 
     public interface createDataParsed {
@@ -149,8 +154,11 @@ public class FavSongFragment extends ListFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         favoritesOperations.removeSong(index);
-                        // TODO if we have search Text then it would be filteredFavouriteMusicList
-                        createDataParsed.fullSongList(favouriteMusicList, position);
+                        if (searchedFilter) {
+                            createDataParsed.fullSongList(filteredFavouriteMusicList, position);
+                        } else {
+                            createDataParsed.fullSongList(favouriteMusicList, position);
+                        }
                         setSongsInListView();
                     }
                 });

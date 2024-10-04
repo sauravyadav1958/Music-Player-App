@@ -608,7 +608,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onCompletion(MediaPlayer mp) {
                 imgBtnPlayPause.setImageResource(R.drawable.play_icon);
-                // TODO viewPager.getCurrentItem() will return 2 if i am on page 1 after playing song from page 2.
                 Music currentMusic = musicList.get(currentPosition);
                 if (playlistFlag && currentMusic.getFav().equals("1")) {
                     if (currentPosition + 1 < musicList.size()) {

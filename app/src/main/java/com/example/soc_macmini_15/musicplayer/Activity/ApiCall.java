@@ -2,7 +2,6 @@ package com.example.soc_macmini_15.musicplayer.Activity;
 
 
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
@@ -20,7 +19,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ApiCall extends AsyncTask<String, Void, ArrayList<Music>> {
+public class ApiCall {
 
     private Context context;
     private createDataParse createDataParse;
@@ -28,6 +27,7 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<Music>> {
 
     public ApiCall(Context context) {
         this.context = context;
+        // TODO what this is doing
         createDataParse = (createDataParse) this.context;
         favoritesOperations = new FavoritesOperations(context);
     }
@@ -63,7 +63,6 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<Music>> {
         this.accessToken = accessToken;
     }
 
-    @Override
     protected ArrayList<Music> doInBackground(String... strings) {
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);

@@ -1,6 +1,6 @@
 package com.example.soc_macmini_15.musicplayer.Model;
 
-public class SongsList {
+public class Music {
 
     private String title;
     private String subTitle;
@@ -15,7 +15,7 @@ public class SongsList {
         this.path = path;
     }
 
-    public SongsList(String title, String subTitle, String path, String fav) {
+    public Music(String title, String subTitle, String path, String fav) {
         this.title = title;
         this.subTitle = subTitle;
         this.path = path;

@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,9 +16,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.ListFragment;
 
-import com.example.soc_macmini_15.musicplayer.Adapter.SongAdapter;
+import com.example.soc_macmini_15.musicplayer.Adapter.MusicAdapter;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
-import com.example.soc_macmini_15.musicplayer.Model.SongsList;
+import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
 
 import java.util.ArrayList;
@@ -29,8 +28,8 @@ public class FavSongFragment extends ListFragment {
     private FavoritesOperations favoritesOperations;
 
 
-    public ArrayList<SongsList> songsList;
-    public ArrayList<SongsList> newList;
+    public ArrayList<Music> favouriteMusicList;
+    public ArrayList<Music> filteredFavouriteMusicList;
 
     private ListView listView;
 
@@ -65,20 +64,20 @@ public class FavSongFragment extends ListFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         listView = view.findViewById(R.id.list_playlist);
-        setContent();
+        setSongsInListView();
     }
 
     /**
      * Setting the content in the listView and sending the data to the Activity
      */
-    public void setContent() {
+    public void setSongsInListView() {
         boolean searchedList = false;
-        songsList = new ArrayList<>();
-        newList = new ArrayList<>();
-        songsList = favoritesOperations.getAllFavorites();
-        SongAdapter adapter = new SongAdapter(getContext(), songsList);
+        favouriteMusicList = new ArrayList<>();
+        filteredFavouriteMusicList = new ArrayList<>();
+        favouriteMusicList = favoritesOperations.getAllFavorites();
+        MusicAdapter adapter = new MusicAdapter(getContext(), favouriteMusicList);
         if (!createDataParsed.queryText().equals("")) {
-            adapter = onQueryTextChange();
+            adapter = setFilteredOfflineMusicList();
             adapter.notifyDataSetChanged();
             searchedList = true;
         } else {
@@ -91,13 +90,12 @@ public class FavSongFragment extends ListFragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Toast.makeText(getContext(), "You clicked :\n" + songsList.get(position), Toast.LENGTH_SHORT).show();
                 if (!finalSearchedList) {
-                    createDataParsed.onDataPass(songsList.get(position).getTitle(), songsList.get(position).getPath(), songsList.get(position).getFav());
-                    createDataParsed.fullSongList(songsList, position);
+                    createDataParsed.pickMusicAndPlay(favouriteMusicList.get(position).getTitle(), favouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
+                    createDataParsed.fullSongList(favouriteMusicList, position);
                 } else {
-                    createDataParsed.onDataPass(newList.get(position).getTitle(), newList.get(position).getPath(), songsList.get(position).getFav());
-                    createDataParsed.fullSongList(songsList, position);
+                    createDataParsed.pickMusicAndPlay(filteredFavouriteMusicList.get(position).getTitle(), filteredFavouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
+                    createDataParsed.fullSongList(favouriteMusicList, position);
                 }
             }
         });
@@ -111,31 +109,28 @@ public class FavSongFragment extends ListFragment {
     }
 
     private void deleteOption(int position) {
-//        if (position != createDataParsed.getPosition())
-            showDialog(songsList.get(position).getPath(), position);
-//        else
-//            Toast.makeText(getContext(), "You Can't delete the Current Song", Toast.LENGTH_SHORT).show();
+        showDialog(favouriteMusicList.get(position).getPath(), position);
     }
 
     public interface createDataParsed {
-        public void onDataPass(String name, String path, String fav);
+        public void pickMusicAndPlay(String name, String path, String fav);
 
-        public void fullSongList(ArrayList<SongsList> songList, int position);
+        public void fullSongList(ArrayList<Music> songList, int position);
 
         public int getPosition();
 
         public String queryText();
     }
 
-    public SongAdapter onQueryTextChange() {
+    public MusicAdapter setFilteredOfflineMusicList() {
         String text = createDataParsed.queryText();
-        for (SongsList songs : songsList) {
-            String title = songs.getTitle().toLowerCase();
+        for (Music music : favouriteMusicList) {
+            String title = music.getTitle().toLowerCase();
             if (title.contains(text)) {
-                newList.add(songs);
+                filteredFavouriteMusicList.add(music);
             }
         }
-        return new SongAdapter(getContext(), newList);
+        return new MusicAdapter(getContext(), filteredFavouriteMusicList);
 
     }
 
@@ -154,8 +149,9 @@ public class FavSongFragment extends ListFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         favoritesOperations.removeSong(index);
-                        createDataParsed.fullSongList(songsList, position);
-                        setContent();
+                        // TODO if we have search Text then it would be filteredFavouriteMusicList
+                        createDataParsed.fullSongList(favouriteMusicList, position);
+                        setSongsInListView();
                     }
                 });
         AlertDialog alertDialog = builder.create();

@@ -11,19 +11,19 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.soc_macmini_15.musicplayer.Model.SongsList;
+import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
 
 import java.util.ArrayList;
 
 // Adapter: Converts data into view items displayable into the UI Component.
 // ArrayAdapter: Used for list of single type items
-public class SongAdapter extends ArrayAdapter<SongsList> implements Filterable {
+public class MusicAdapter extends ArrayAdapter<Music> implements Filterable {
 
     private Context mContext;
-    private ArrayList<SongsList> songList = new ArrayList<>();
+    private ArrayList<Music> songList = new ArrayList<>();
 
-    public SongAdapter(Context mContext, ArrayList<SongsList> songList) {
+    public MusicAdapter(Context mContext, ArrayList<Music> songList) {
         super(mContext, 0, songList);
         this.mContext = mContext;
         this.songList = songList;
@@ -36,9 +36,10 @@ public class SongAdapter extends ArrayAdapter<SongsList> implements Filterable {
         if (listItem == null) {
             listItem = LayoutInflater.from(mContext).inflate(R.layout.playlist_items, parent, false);
         }
-        SongsList currentSong = songList.get(position);
+        Music currentSong = songList.get(position);
         TextView tvTitle = listItem.findViewById(R.id.tv_music_name);
         TextView tvSubtitle = listItem.findViewById(R.id.tv_music_subtitle);
+        // how below values are present in listItem
         tvTitle.setText(currentSong.getTitle());
         tvSubtitle.setText(currentSong.getSubTitle());
         return listItem;

@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">Music Player</string>
+    <string name="nav_open">Open</string>
+    <string name="nav_close">Close</string>
 
     <string name="title">My Music Player</string>
     <string name="theme_color">Theme Color</string>

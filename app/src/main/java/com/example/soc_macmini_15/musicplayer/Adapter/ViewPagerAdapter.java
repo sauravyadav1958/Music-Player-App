@@ -10,32 +10,33 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.example.soc_macmini_15.musicplayer.Fragments.AllSongFragment;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Fragments.FavSongFragment;
-import com.example.soc_macmini_15.musicplayer.Model.SongsList;
+import com.example.soc_macmini_15.musicplayer.Model.Music;
 
 import java.util.ArrayList;
-import java.util.List;
 
 // FragmentPagerAdapter: flip left and right through pages of data (number of pages fixed)
 // FragmentStatePagerAdapter: flip left and right through pages of data (number of pages are dynamic)
 public class ViewPagerAdapter extends FragmentPagerAdapter {
-    // Provides application access to data.
+    // Provides access to shared data (For query).
     private ContentResolver contentResolver;
     private String title[] = {"OFFLINE SONGS", "SEARCH SONGS", "FAVORITES"};
-    ArrayList<SongsList> searchResultList;
+    ArrayList<Music> searchResultList;
 
-    public ViewPagerAdapter(FragmentManager fm, ContentResolver contentResolver, ArrayList<SongsList> searchResultList) {
+    public ViewPagerAdapter(FragmentManager fm, ContentResolver contentResolver, ArrayList<Music> searchResultList) {
         super(fm);
         this.contentResolver = contentResolver;
         this.searchResultList = searchResultList;
     }
 
+    // gets called twice to make preload the adjacent tab also.
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
+                // TODO why contentResolver from MainActivity only?
                 return AllSongFragment.getInstance(position, contentResolver);
             case 1:
-                return CurrentSongFragment.getInstance(position, contentResolver, searchResultList);
+                return CurrentSongFragment.getInstance(position, searchResultList);
             case 2:
                 return FavSongFragment.getInstance(position);
             default:

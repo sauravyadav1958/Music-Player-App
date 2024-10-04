@@ -6,12 +6,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Activity.MainActivity">
-
+<!--RelativeLayout: adjust views/widgets according to one’s satisfaction-->
     <RelativeLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
+        <!-- we put this Toolbar inside DrawerLayout so that DrawerLayout will come above the ToolBar,
+         we set theme to NoActionBar so that instead of default ActionBar in theme,
+         this Toolbar will be used to setSupportActionBar() since that default ActionBar will be above the drawerLayout always.
+          -->
+        <!-- ?attr/actionBarSize: Android inbuilt standard actionBarSize-->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
@@ -35,7 +39,8 @@
             android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/ll_include_controls"
             android:background="@color/colorPrimary">
-
+        <!--android: Android SDK attributes,
+            app: support library attributes-->
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabs"
                 android:layout_width="match_parent"
@@ -49,7 +54,7 @@
                 app:tabTextColor="@color/off_color" />
         </LinearLayout>
 
-
+<!-- ViewPager: widget used to create swipeable screens-->
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/songs_viewpager"
             android:background="@color/color_black"

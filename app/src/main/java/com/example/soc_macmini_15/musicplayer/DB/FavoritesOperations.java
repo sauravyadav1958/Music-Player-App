@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-import com.example.soc_macmini_15.musicplayer.Model.SongsList;
+import com.example.soc_macmini_15.musicplayer.Model.Music;
 
 import java.util.ArrayList;
 
@@ -40,31 +40,32 @@ public class FavoritesOperations {
         dbHandler.close();
     }
 
-    public void addSongFav(SongsList songsList) {
+    public void addSongFav(Music music) {
         open();
+        // ContentValues: for storing values that contentResolver can process.
         ContentValues values = new ContentValues();
-        values.put(FavoritesDBHandler.COLUMN_TITLE, songsList.getTitle());
-        values.put(FavoritesDBHandler.COLUMN_SUBTITLE, songsList.getSubTitle());
-        values.put(FavoritesDBHandler.COLUMN_PATH, songsList.getPath());
-        values.put(FavoritesDBHandler.COLUMN_FAV, songsList.getFav());
+        values.put(FavoritesDBHandler.COLUMN_TITLE, music.getTitle());
+        values.put(FavoritesDBHandler.COLUMN_SUBTITLE, music.getSubTitle());
+        values.put(FavoritesDBHandler.COLUMN_PATH, music.getPath());
+        values.put(FavoritesDBHandler.COLUMN_FAV, music.getFav());
 
         database.insertWithOnConflict(FavoritesDBHandler.TABLE_SONGS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
 
         close();
     }
 
-    public ArrayList<SongsList> getAllFavorites() {
+    public ArrayList<Music> getAllFavorites() {
         open();
         Cursor cursor = database.query(FavoritesDBHandler.TABLE_SONGS, allColumns,
                 null, null, null, null, null);
-        ArrayList<SongsList> favSongs = new ArrayList<>();
+        ArrayList<Music> favSongs = new ArrayList<>();
         if (cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
-                SongsList songsList = new SongsList(cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_TITLE))
+                Music music = new Music(cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_TITLE))
                         , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_SUBTITLE))
                         , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_PATH))
                         , cursor.getString(cursor.getColumnIndex(FavoritesDBHandler.COLUMN_FAV)));
-                favSongs.add(songsList);
+                favSongs.add(music);
             }
         }
         close();

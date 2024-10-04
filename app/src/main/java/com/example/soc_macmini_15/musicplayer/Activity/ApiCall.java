@@ -7,7 +7,7 @@ import android.util.Log;
 
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
-import com.example.soc_macmini_15.musicplayer.Model.SongsList;
+import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -20,7 +20,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
+public class ApiCall extends AsyncTask<String, Void, ArrayList<Music>> {
 
     private Context context;
     private createDataParse createDataParse;
@@ -33,17 +33,17 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
     }
 
 
-    public ArrayList<SongsList> searchResultList;
+    public ArrayList<Music> searchResultList;
 
     private String query = "";
 
     private String accessToken = "";
 
-    public ArrayList<SongsList> getSearchResultList() {
+    public ArrayList<Music> getSearchResultList() {
         return searchResultList;
     }
 
-    public void setSearchResultList(ArrayList<SongsList> searchResultList) {
+    public void setSearchResultList(ArrayList<Music> searchResultList) {
         this.searchResultList = searchResultList;
     }
 
@@ -64,9 +64,10 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
     }
 
     @Override
-    protected ArrayList<SongsList> doInBackground(String... strings) {
+    protected ArrayList<Music> doInBackground(String... strings) {
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        // TODO make to token call only after token has expired
         ApiService apiServiceForToken = ApiClient.getAccessToken().create(ApiService.class);
         final String TAG = "MainActivity";
 
@@ -97,7 +98,7 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
                             JsonArray tracks = response.body().getAsJsonObject("tracks").getAsJsonArray("items");
                             // Handle the response, e.g., update the UI
                             searchResultList = new ArrayList<>();
-                            ArrayList<SongsList> favSongList = favoritesOperations.getAllFavorites();
+                            ArrayList<Music> favSongList = favoritesOperations.getAllFavorites();
                             for (JsonElement track : tracks) {
                                 String name = track.getAsJsonObject().get("name").getAsString();
                                 String id = track.getAsJsonObject().get("id").getAsString();
@@ -107,13 +108,13 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
                                 }
                                 String preview_url = url.getAsString();
                                 String fav = "0";
-                                Optional<SongsList> favSong = favSongList.stream().filter(songsList -> songsList.getPath().equals(preview_url)).findFirst();
+                                Optional<Music> favSong = favSongList.stream().filter(songsList -> songsList.getPath().equals(preview_url)).findFirst();
                                 if (favSong.isPresent()) {
                                     fav = "1";
                                 }
-                                searchResultList.add(new SongsList(name, id, preview_url, fav));
+                                searchResultList.add(new Music(name, id, preview_url, fav));
                             }
-                            CurrentSongFragment.newList = searchResultList;
+                            CurrentSongFragment.onlineSearchMusicList = searchResultList;
                             createDataParse.setPagerLayout(searchResultList);
                             createDataParse.setViewPager(1);
 
@@ -165,8 +166,9 @@ public class ApiCall extends AsyncTask<String, Void, ArrayList<SongsList>> {
         return searchResultList;
     }
 
+    //TODO is this the only way to pass variables across the Activities
     public interface createDataParse {
-        public void setPagerLayout(ArrayList<SongsList> searchResultList);
+        public void setPagerLayout(ArrayList<Music> searchResultList);
 
         public void setViewPager(int position);
 

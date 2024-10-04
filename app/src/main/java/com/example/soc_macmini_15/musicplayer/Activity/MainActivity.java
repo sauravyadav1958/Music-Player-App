@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     MediaPlayer mediaPlayer;
     // send and process message/runnable to the thread's messageQueue.
     Handler handler;
-    // interface which is implemented by class whose instances are executed by a thread
+    // interface that represents a task that can be executed by a thread in background.
     Runnable runnable;
     private ActivityResultLauncher<Intent> storageActivityResultLauncher;
 //    private ActivityResultLauncher<String> permissionLauncher;
@@ -659,12 +659,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * Function to play the song using a thread
      */
-    // TODO have to understand this
     private void playCycle() {
         try {
             seekbarController.setProgress(mediaPlayer.getCurrentPosition());
             tvCurrentTime.setText(getTimeFormatted(mediaPlayer.getCurrentPosition()));
             if (mediaPlayer.isPlaying()) {
+                // creating task to run in background thread.
                 runnable = new Runnable() {
                     @Override
                     public void run() {
@@ -672,6 +672,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                     }
                 };
+                // run the runnable in background thread after a delay of 100 milliseconds.
                 handler.postDelayed(runnable, 100);
             }
         } catch (Exception e) {
@@ -760,7 +761,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         mediaPlayer.release();
-        // TODO what is this
+        // empty the messageQueue having pending posts of runnable
         handler.removeCallbacks(runnable);
     }
 }

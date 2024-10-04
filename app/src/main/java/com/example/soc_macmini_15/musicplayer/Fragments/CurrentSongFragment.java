@@ -24,7 +24,7 @@ import com.example.soc_macmini_15.musicplayer.R;
 import java.util.ArrayList;
 
 public class CurrentSongFragment extends ListFragment {
-
+    // TODO is it important to initialize here
     public static ArrayList<Music> onlineSearchMusicList = new ArrayList<>();
 
     private ListView listView;

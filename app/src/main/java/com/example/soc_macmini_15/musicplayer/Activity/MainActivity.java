@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         storageActivityResultLauncher =
                 registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                         new ActivityResultCallback<ActivityResult>() {
-                    //
+                            //
                             @Override
                             public void onActivityResult(ActivityResult o) {
                                 if (checkStoragePermissions()) {
@@ -609,7 +609,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void onCompletion(MediaPlayer mp) {
                 imgBtnPlayPause.setImageResource(R.drawable.play_icon);
                 // TODO viewPager.getCurrentItem() will return 2 if i am on page 1 after playing song from page 2.
-                if (playlistFlag && viewPager.getCurrentItem() == 2) {
+                Music currentMusic = musicList.get(currentPosition);
+                if (playlistFlag && currentMusic.getFav().equals("1")) {
                     if (currentPosition + 1 < musicList.size()) {
                         pickMusicAndPlay(musicList.get(currentPosition + 1).getTitle(), musicList.get(currentPosition + 1).getPath(), musicList.get(currentPosition + 1).getFav());
                         currentPosition += 1;

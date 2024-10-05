@@ -1,4 +1,4 @@
-package com.example.soc_macmini_15.musicplayer.Activity;
+package com.example.soc_macmini_15.musicplayer.APIs;
 
 import com.google.gson.JsonObject;
 

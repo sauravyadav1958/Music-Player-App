@@ -1,4 +1,4 @@
-package com.example.soc_macmini_15.musicplayer.Activity;
+package com.example.soc_macmini_15.musicplayer.ApiConfig;
 
 public interface NetworkCallback<T> {
     void onSuccess(T result);     // Called when the response is successful

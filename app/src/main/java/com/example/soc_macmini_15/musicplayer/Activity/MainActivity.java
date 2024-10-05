@@ -41,7 +41,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.soc_macmini_15.musicplayer.APIs.AccessTokenApi;
+import com.example.soc_macmini_15.musicplayer.APIs.MusicSearchApi;
 import com.example.soc_macmini_15.musicplayer.Adapter.ViewPagerAdapter;
+import com.example.soc_macmini_15.musicplayer.ApiConfig.NetworkCallback;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Fragments.AllSongFragment;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;

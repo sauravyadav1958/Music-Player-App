@@ -1,9 +1,10 @@
-package com.example.soc_macmini_15.musicplayer.Activity;
+package com.example.soc_macmini_15.musicplayer.APIs;
 
 
 import android.content.Context;
 import android.util.Log;
 
+import com.example.soc_macmini_15.musicplayer.ApiConfig.ApiClient;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
@@ -36,7 +37,7 @@ public class MusicSearchApi {
     public ArrayList<Music> searchResultList;
 
 
-    protected void searchMusicAsPerQuery(String accessToken, String query) {
+    public void searchMusicAsPerQuery(String accessToken, String query) {
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
 

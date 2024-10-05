@@ -1,4 +1,4 @@
-package com.example.soc_macmini_15.musicplayer.Activity;
+package com.example.soc_macmini_15.musicplayer.ApiConfig;
 
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;

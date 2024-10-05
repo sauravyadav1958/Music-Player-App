@@ -1,8 +1,10 @@
-package com.example.soc_macmini_15.musicplayer.Activity;
+package com.example.soc_macmini_15.musicplayer.APIs;
 
 import android.content.Context;
 import android.util.Log;
 
+import com.example.soc_macmini_15.musicplayer.ApiConfig.ApiClient;
+import com.example.soc_macmini_15.musicplayer.ApiConfig.NetworkCallback;
 import com.example.soc_macmini_15.musicplayer.R;
 import com.google.gson.JsonObject;
 

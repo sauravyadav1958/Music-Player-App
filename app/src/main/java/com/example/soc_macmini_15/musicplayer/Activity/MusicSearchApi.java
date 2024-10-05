@@ -27,7 +27,8 @@ public class MusicSearchApi {
 
     public MusicSearchApi(Context context) {
         this.context = context;
-        // TODO what this is doing
+        // casting MainActivity context to interface.
+        // This will help in accessing the functions of the interface implemented in MainActivity.
         createDataParse = (createDataParse) this.context;
         favoritesOperations = new FavoritesOperations(context);
     }

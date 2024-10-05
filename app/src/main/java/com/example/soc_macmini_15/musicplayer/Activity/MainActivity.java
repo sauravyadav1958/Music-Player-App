@@ -3,6 +3,7 @@ package com.example.soc_macmini_15.musicplayer.Activity;
 
 import android.Manifest;
 import android.app.SearchManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -309,6 +310,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      */
 
     public void setPagerLayout(ArrayList<Music> searchResultList) {
+        // contentResolver is present in Activity class. We can do getActivity().getContentResolver() in Fragments.
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager(), getContentResolver(), searchResultList);
         viewPager.setAdapter(adapter);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -380,7 +382,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
-        // TODO what is inflater
+        // inflate(create) : create a menu from an XML resource file into a Menu object
         getMenuInflater().inflate(R.menu.action_bar_menu, menu);
         SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
@@ -465,7 +467,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Music favList = new Music(musicList.get(currentPosition).getTitle(),
                                     musicList.get(currentPosition).getSubTitle(), musicList.get(currentPosition).getPath(),
                                     musicList.get(currentPosition).getFav());
-                            // TODO is it imp to pass context here ?
                             FavoritesOperations favoritesOperations = new FavoritesOperations(this);
                             favoritesOperations.addSongFav(favList);
                             int currentItem = viewPager.getCurrentItem();
@@ -740,6 +741,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public String queryText() {
         return searchText.toLowerCase();
+    }
+
+    @Override
+    public ContentResolver getContentResolverMain() {
+        return getContentResolver();
     }
 
     @Override

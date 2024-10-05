@@ -31,8 +31,6 @@ import java.util.Optional;
 
 public class AllSongFragment extends ListFragment {
 
-    // TODO can we remove this static variable
-    private static ContentResolver staticContentResolver;
     private FavoritesOperations favoritesOperations;
 
     public ArrayList<Music> offlineMusicList;
@@ -44,14 +42,13 @@ public class AllSongFragment extends ListFragment {
     private ContentResolver contentResolver;
     private boolean searchedFilter = false;
 
-    public static Fragment getInstance(int position, ContentResolver mcontentResolver) {
+    public static Fragment getInstance(int position) {
         // Store key pair data
-        // TODO what if don't pass pos here.
+        // pos is passed just in case we need the position information.
         Bundle bundle = new Bundle();
         bundle.putInt("pos", position);
         AllSongFragment tabFragment = new AllSongFragment();
         tabFragment.setArguments(bundle);
-        staticContentResolver = mcontentResolver;
         return tabFragment;
     }
 
@@ -69,17 +66,18 @@ public class AllSongFragment extends ListFragment {
         createDataParse = (createDataParse) context;
         favoritesOperations = new FavoritesOperations(context);
     }
-
+    // ViewGroup: contain other children views eg : TextView, etc.
+    // subclasses of ViewGroup: LinearLayout, RelativeLayout, ConstraintLayout, FrameLayout, and RecyclerView.
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // TODO what is inflater
+        // create a layout from an XML resource file into view object.
         return inflater.inflate(R.layout.fragment_tab, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         listView = view.findViewById(R.id.list_playlist);
-        contentResolver = staticContentResolver;
+        contentResolver = createDataParse.getContentResolverMain();
         setSongsInListView();
     }
 
@@ -213,6 +211,7 @@ public class AllSongFragment extends ListFragment {
         public void pickMusicAndPlay(String name, String path, String fav);
 
         public void currentSong(Music music);
+        public ContentResolver getContentResolverMain();
 
         public Music getCurrentSong();
 

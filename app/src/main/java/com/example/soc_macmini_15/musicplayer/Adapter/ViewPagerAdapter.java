@@ -33,8 +33,7 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                // TODO why contentResolver from MainActivity only?
-                return AllSongFragment.getInstance(position, contentResolver);
+                return AllSongFragment.getInstance(position);
             case 1:
                 return CurrentSongFragment.getInstance(position, searchResultList);
             case 2:

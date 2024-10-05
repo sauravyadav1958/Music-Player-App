@@ -15,16 +15,11 @@ public class AccessTokenApi {
     public AccessTokenApi(Context context) {
         this.context = context;
     }
-
     // TAG has className, helps in identifying class source of the log.
     final String TAG = "AccessTokenApi";
 
     ApiService apiServiceForToken = ApiClient.getAccessToken().create(ApiService.class);
 
-
-
-
-    // TODO make to token call only after token has expired
     public void getAccessToken(final NetworkCallback<JsonObject> callback) {
         String grantType = context.getString(R.string.grant_type);
         String clientId = context.getString(R.string.client_id);
@@ -41,7 +36,6 @@ public class AccessTokenApi {
                 Log.e(TAG, "API call failed: " + t.getMessage());
                 callback.onError(new Exception(t));
             }
-
         });
     }
 

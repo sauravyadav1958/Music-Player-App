@@ -9,6 +9,7 @@ import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
+import com.example.soc_macmini_15.musicplayer.Activity.CommonResourceInterface;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -23,14 +24,14 @@ import retrofit2.Response;
 public class MusicSearchApi {
 
     private Context context;
-    private createDataParse createDataParse;
+    private CommonResourceInterface CommonResourceInterface;
     private FavoritesOperations favoritesOperations;
 
     public MusicSearchApi(Context context) {
         this.context = context;
         // casting MainActivity context to interface.
         // This will help in accessing the functions of the interface implemented in MainActivity.
-        createDataParse = (createDataParse) this.context;
+        CommonResourceInterface = (CommonResourceInterface) this.context;
         favoritesOperations = new FavoritesOperations(context);
     }
 
@@ -72,8 +73,8 @@ public class MusicSearchApi {
                         searchResultList.add(new Music(name, id, preview_url, fav));
                     }
                     CurrentSongFragment.onlineSearchMusicList = searchResultList;
-                    createDataParse.setPagerLayout(searchResultList);
-                    createDataParse.setViewPager(1);
+                    CommonResourceInterface.setPagerLayout(searchResultList);
+                    CommonResourceInterface.setViewPager(1);
 
                 } else {
                     // Handle the error
@@ -89,13 +90,6 @@ public class MusicSearchApi {
         });
     }
 
-    //TODO is this the only way to pass variables across the Activities
-    public interface createDataParse {
-        public void setPagerLayout(ArrayList<Music> searchResultList);
-
-        public void setViewPager(int position);
-
-    }
 
 
 }

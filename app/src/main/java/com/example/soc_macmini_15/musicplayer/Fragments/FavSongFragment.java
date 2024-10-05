@@ -20,6 +20,7 @@ import com.example.soc_macmini_15.musicplayer.Adapter.MusicAdapter;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
+import com.example.soc_macmini_15.musicplayer.Activity.CommonResourceInterface;
 
 import java.util.ArrayList;
 
@@ -33,7 +34,7 @@ public class FavSongFragment extends ListFragment {
 
     private ListView listView;
 
-    private createDataParsed createDataParsed;
+    private CommonResourceInterface CommonResourceInterface;
     private boolean searchedFilter = false;
 
     public static Fragment getInstance(int position) {
@@ -53,7 +54,7 @@ public class FavSongFragment extends ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        createDataParsed = (createDataParsed) context;
+        CommonResourceInterface = (CommonResourceInterface) context;
         favoritesOperations = new FavoritesOperations(context);
     }
 
@@ -77,7 +78,7 @@ public class FavSongFragment extends ListFragment {
         filteredFavouriteMusicList = new ArrayList<>();
         favouriteMusicList = favoritesOperations.getAllFavorites();
         MusicAdapter adapter = new MusicAdapter(getContext(), favouriteMusicList);
-        if (!createDataParsed.queryText().equals("")) {
+        if (!CommonResourceInterface.queryTextToLowerCase().equals("")) {
             adapter = setFilteredOfflineMusicList();
             adapter.notifyDataSetChanged();
             searchedFilter = true;
@@ -92,11 +93,11 @@ public class FavSongFragment extends ListFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!finalSearchedList) {
-                    createDataParsed.pickMusicAndPlay(favouriteMusicList.get(position).getTitle(), favouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
-                    createDataParsed.fullSongList(favouriteMusicList, position);
+                    CommonResourceInterface.pickMusicAndPlay(favouriteMusicList.get(position).getTitle(), favouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
+                    CommonResourceInterface.fullSongList(favouriteMusicList, position);
                 } else {
-                    createDataParsed.pickMusicAndPlay(filteredFavouriteMusicList.get(position).getTitle(), filteredFavouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
-                    createDataParsed.fullSongList(favouriteMusicList, position);
+                    CommonResourceInterface.pickMusicAndPlay(filteredFavouriteMusicList.get(position).getTitle(), filteredFavouriteMusicList.get(position).getPath(), favouriteMusicList.get(position).getFav());
+                    CommonResourceInterface.fullSongList(favouriteMusicList, position);
                 }
             }
         });
@@ -117,18 +118,8 @@ public class FavSongFragment extends ListFragment {
         }
     }
 
-    public interface createDataParsed {
-        public void pickMusicAndPlay(String name, String path, String fav);
-
-        public void fullSongList(ArrayList<Music> songList, int position);
-
-        public int getPosition();
-
-        public String queryText();
-    }
-
     public MusicAdapter setFilteredOfflineMusicList() {
-        String text = createDataParsed.queryText();
+        String text = CommonResourceInterface.queryTextToLowerCase();
         for (Music music : favouriteMusicList) {
             String title = music.getTitle().toLowerCase();
             if (title.contains(text)) {
@@ -155,9 +146,9 @@ public class FavSongFragment extends ListFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         favoritesOperations.removeSong(index);
                         if (searchedFilter) {
-                            createDataParsed.fullSongList(filteredFavouriteMusicList, position);
+                            CommonResourceInterface.fullSongList(filteredFavouriteMusicList, position);
                         } else {
-                            createDataParsed.fullSongList(favouriteMusicList, position);
+                            CommonResourceInterface.fullSongList(favouriteMusicList, position);
                         }
                         setSongsInListView();
                     }

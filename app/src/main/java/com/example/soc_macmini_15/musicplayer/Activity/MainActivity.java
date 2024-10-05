@@ -46,9 +46,6 @@ import com.example.soc_macmini_15.musicplayer.APIs.MusicSearchApi;
 import com.example.soc_macmini_15.musicplayer.Adapter.ViewPagerAdapter;
 import com.example.soc_macmini_15.musicplayer.ApiConfig.NetworkCallback;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
-import com.example.soc_macmini_15.musicplayer.Fragments.AllSongFragment;
-import com.example.soc_macmini_15.musicplayer.Fragments.CurrentSongFragment;
-import com.example.soc_macmini_15.musicplayer.Fragments.FavSongFragment;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -60,7 +57,7 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, AllSongFragment.createDataParse, FavSongFragment.createDataParsed, CurrentSongFragment.createDataParse, MusicSearchApi.createDataParse {
+public class MainActivity extends AppCompatActivity implements CommonResourceInterface, View.OnClickListener {
 
     private Menu menu;
 
@@ -424,7 +421,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public boolean onQueryTextChange(String newText) {
                 searchText = newText;
-                queryText();
                 int currentItem = viewPager.getCurrentItem();
                 setPagerLayout(new ArrayList<>());
                 if (currentItem == 1) {
@@ -742,7 +738,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public String queryText() {
+    public String queryTextToLowerCase() {
         return searchText.toLowerCase();
     }
 
@@ -768,7 +764,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void currentSong(Music music) {
+    public void setCurrentSong(Music music) {
         this.currSong = music;
     }
 

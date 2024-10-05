@@ -20,6 +20,7 @@ import androidx.fragment.app.ListFragment;
 import com.example.soc_macmini_15.musicplayer.Adapter.MusicAdapter;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
+import com.example.soc_macmini_15.musicplayer.Activity.CommonResourceInterface;
 
 import java.util.ArrayList;
 
@@ -29,7 +30,7 @@ public class CurrentSongFragment extends ListFragment {
 
     private ListView listView;
 
-    private CurrentSongFragment.createDataParse createDataParse;
+    private CommonResourceInterface CommonResourceInterface;
 
     public static Fragment getInstance(int position, ArrayList<Music> searchResultList) {
         // Store key pair data
@@ -53,7 +54,7 @@ public class CurrentSongFragment extends ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        createDataParse = (createDataParse) context;
+        CommonResourceInterface = (CommonResourceInterface) context;
     }
 
     @Override
@@ -79,8 +80,8 @@ public class CurrentSongFragment extends ListFragment {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                createDataParse.pickMusicAndPlay(onlineSearchMusicList.get(position).getTitle(), onlineSearchMusicList.get(position).getPath(), onlineSearchMusicList.get(position).getFav());
-                createDataParse.fullSongList(onlineSearchMusicList, position);
+                CommonResourceInterface.pickMusicAndPlay(onlineSearchMusicList.get(position).getTitle(), onlineSearchMusicList.get(position).getPath(), onlineSearchMusicList.get(position).getFav());
+                CommonResourceInterface.fullSongList(onlineSearchMusicList, position);
             }
         });
 
@@ -106,13 +107,13 @@ public class CurrentSongFragment extends ListFragment {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MediaPlayer mediaPlayer = createDataParse.getMediaPlayer();
+                        MediaPlayer mediaPlayer = CommonResourceInterface.getMediaPlayer();
                         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
-                                createDataParse.pickMusicAndPlay(onlineSearchMusicList.get(position).getTitle(),
+                                CommonResourceInterface.pickMusicAndPlay(onlineSearchMusicList.get(position).getTitle(),
                                         onlineSearchMusicList.get(position).getPath(), onlineSearchMusicList.get(position).getFav());
-                                createDataParse.fullSongList(onlineSearchMusicList, position);
+                                CommonResourceInterface.fullSongList(onlineSearchMusicList, position);
                             }
                         });
                     }
@@ -121,21 +122,6 @@ public class CurrentSongFragment extends ListFragment {
         alertDialog.show();
     }
 
-    public interface createDataParse {
-        public void pickMusicAndPlay(String name, String path, String fav);
-
-        public void fullSongList(ArrayList<Music> songList, int position);
-
-        public String queryText();
-
-        public void currentSong(Music music);
-
-        public MediaPlayer getMediaPlayer();
-
-        public Music getSong();
-
-        public boolean getPlaylistFlag();
-    }
 
 
 }

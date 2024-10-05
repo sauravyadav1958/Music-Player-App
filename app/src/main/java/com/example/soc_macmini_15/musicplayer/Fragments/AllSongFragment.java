@@ -25,6 +25,7 @@ import com.example.soc_macmini_15.musicplayer.Adapter.MusicAdapter;
 import com.example.soc_macmini_15.musicplayer.DB.FavoritesOperations;
 import com.example.soc_macmini_15.musicplayer.Model.Music;
 import com.example.soc_macmini_15.musicplayer.R;
+import com.example.soc_macmini_15.musicplayer.Activity.CommonResourceInterface;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -38,7 +39,7 @@ public class AllSongFragment extends ListFragment {
 
     private ListView listView;
 
-    private createDataParse createDataParse;
+    private CommonResourceInterface CommonResourceInterface;
     private ContentResolver contentResolver;
     private boolean searchedFilter = false;
 
@@ -63,7 +64,7 @@ public class AllSongFragment extends ListFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        createDataParse = (createDataParse) context;
+        CommonResourceInterface = (CommonResourceInterface) context;
         favoritesOperations = new FavoritesOperations(context);
     }
     // ViewGroup: contain other children views eg : TextView, etc.
@@ -77,7 +78,7 @@ public class AllSongFragment extends ListFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         listView = view.findViewById(R.id.list_playlist);
-        contentResolver = createDataParse.getContentResolverMain();
+        contentResolver = CommonResourceInterface.getContentResolverMain();
         setSongsInListView();
     }
 
@@ -92,7 +93,7 @@ public class AllSongFragment extends ListFragment {
         setOfflineMusicList();
         // adapter of offlineMusicList for listView
         MusicAdapter adapter = new MusicAdapter(getContext(), offlineMusicList);
-        if (!createDataParse.queryText().equals("")) {
+        if (!CommonResourceInterface.queryTextToLowerCase().equals("")) {
             // populate newList
             adapter = setFilteredOfflineMusicList();
             adapter.notifyDataSetChanged();
@@ -107,15 +108,15 @@ public class AllSongFragment extends ListFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (!finalSearchedList) {
-                    createDataParse.pickMusicAndPlay(offlineMusicList.get(position).getTitle(), offlineMusicList.get(position).getPath(), offlineMusicList.get(position).getFav());
-                    createDataParse.currentSong(offlineMusicList.get(position));
+                    CommonResourceInterface.pickMusicAndPlay(offlineMusicList.get(position).getTitle(), offlineMusicList.get(position).getPath(), offlineMusicList.get(position).getFav());
+                    CommonResourceInterface.setCurrentSong(offlineMusicList.get(position));
                     // we update musicList in MainActivity to get the musicList of current tab
                     // so that we can perform operations on the correct musicList.
-                    createDataParse.fullSongList(offlineMusicList, position);
+                    CommonResourceInterface.fullSongList(offlineMusicList, position);
                 } else {
-                    createDataParse.pickMusicAndPlay(filteredOfflineMusicList.get(position).getTitle(), filteredOfflineMusicList.get(position).getPath(), filteredOfflineMusicList.get(position).getFav());
-                    createDataParse.currentSong(filteredOfflineMusicList.get(position));
-                    createDataParse.fullSongList(filteredOfflineMusicList, position);
+                    CommonResourceInterface.pickMusicAndPlay(filteredOfflineMusicList.get(position).getTitle(), filteredOfflineMusicList.get(position).getPath(), filteredOfflineMusicList.get(position).getFav());
+                    CommonResourceInterface.setCurrentSong(filteredOfflineMusicList.get(position));
+                    CommonResourceInterface.fullSongList(filteredOfflineMusicList, position);
                 }
             }
         });
@@ -157,7 +158,7 @@ public class AllSongFragment extends ListFragment {
     }
 
     public MusicAdapter setFilteredOfflineMusicList() {
-        String text = createDataParse.queryText();
+        String text = CommonResourceInterface.queryTextToLowerCase();
         for (Music music : offlineMusicList) {
             String title = music.getTitle().toLowerCase();
             if (title.contains(text)) {
@@ -181,18 +182,18 @@ public class AllSongFragment extends ListFragment {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MediaPlayer mediaPlayer = createDataParse.getMediaPlayer();
+                        MediaPlayer mediaPlayer = CommonResourceInterface.getMediaPlayer();
                         mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                             @Override
                             public void onCompletion(MediaPlayer mp) {
                                 if (searchedFilter) {
-                                    createDataParse.pickMusicAndPlay(filteredOfflineMusicList.get(position).getTitle(),
+                                    CommonResourceInterface.pickMusicAndPlay(filteredOfflineMusicList.get(position).getTitle(),
                                             filteredOfflineMusicList.get(position).getPath(), filteredOfflineMusicList.get(position).getFav());
-                                    createDataParse.fullSongList(filteredOfflineMusicList, position);
+                                    CommonResourceInterface.fullSongList(filteredOfflineMusicList, position);
                                 } else {
-                                    createDataParse.pickMusicAndPlay(offlineMusicList.get(position).getTitle(),
+                                    CommonResourceInterface.pickMusicAndPlay(offlineMusicList.get(position).getTitle(),
                                             offlineMusicList.get(position).getPath(), offlineMusicList.get(position).getFav());
-                                    createDataParse.fullSongList(offlineMusicList, position);
+                                    CommonResourceInterface.fullSongList(offlineMusicList, position);
                                 }
                             }
                         });
@@ -202,20 +203,5 @@ public class AllSongFragment extends ListFragment {
         alertDialog.show();
     }
 
-    public interface createDataParse {
-
-        public void fullSongList(ArrayList<Music> songList, int position);
-
-        public String queryText();
-
-        public void pickMusicAndPlay(String name, String path, String fav);
-
-        public void currentSong(Music music);
-        public ContentResolver getContentResolverMain();
-
-        public Music getCurrentSong();
-
-        public MediaPlayer getMediaPlayer();
-    }
 
 }

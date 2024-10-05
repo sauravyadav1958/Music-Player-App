@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -50,10 +51,12 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
+import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, AllSongFragment.createDataParse, FavSongFragment.createDataParsed, CurrentSongFragment.createDataParse, ApiCall.createDataParse {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, AllSongFragment.createDataParse, FavSongFragment.createDataParsed, CurrentSongFragment.createDataParse, MusicSearchApi.createDataParse {
 
     private Menu menu;
 
@@ -63,12 +66,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SeekBar seekbarController;
     private DrawerLayout mDrawerLayout;
     private TextView tvCurrentTime, tvTotalTime;
-
+    private String accessToken = "";
 
     private ArrayList<Music> musicList;
     private int currentPosition;
     private String searchText = "";
     private Music currSong;
+    private Date tokenExpiryDate;
 
     private boolean musicSelectedFlag = false, repeatFlag = false, playlistFlag = false, favFlag = true;
     private final int MY_PERMISSION_REQUEST = 100;
@@ -381,15 +385,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         SearchView searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-        ApiCall apiCall = new ApiCall(this);
+        MusicSearchApi musicSearchApi = new MusicSearchApi(this);
+        AccessTokenApi accessTokenApi = new AccessTokenApi(this);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // TODO make api call changes
+                // Storing token expiryDate in code only as of now.
                 int currentItem = viewPager.getCurrentItem();
                 if (currentItem == 1) {
-                    apiCall.setQuery(query);
-                    apiCall.doInBackground();
+                    if (tokenExpiryDate == null || tokenExpiryDate.before(new Date())) {
+                        accessTokenApi.getAccessToken(new NetworkCallback<JsonObject>() {
+                            @Override
+                            public void onSuccess(JsonObject result) {
+                                tokenExpiryDate = new Date(System.currentTimeMillis() + 60000 * 59);
+                                accessToken = "Bearer " + result.get("access_token").getAsString();
+                                musicSearchApi.searchMusicAsPerQuery(accessToken, query);
+                            }
+
+                            @Override
+                            public void onError(Exception e) {
+                                // Handle the error
+                                Log.e("RetrofitError", "Error: " + e.getMessage());
+                            }
+                        });
+                    } else {
+                        musicSearchApi.searchMusicAsPerQuery(accessToken, query);
+                    }
                     return true;
                 }
                 return false;
